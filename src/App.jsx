@@ -13,7 +13,7 @@ const WeatherApp = () => {
   // ✅ Step 1: Function to get weather data
   const handleSearch = async (e) => {
     e.preventDefault();
-    const apiKey = "838403eb5522824b99dca042e79d6def"; // Replace with your actual key
+    const apiKey = import.meta.env.VITE_WEATHER_API_KEY; // Replace with your actual key
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${apiKey}&units=metric`;
 
     const response = await fetch(url);
