@@ -1,88 +1,75 @@
-import { useState } from "react";
-import SearchBar from "./components/SearchBar";
+import React, { useState } from "react";
+import sunny from "./assets/sunny.jpg";
+import rainy from "./assets/rainy.jpg";
+import cloudy from "./assets/cloudy.jpg";
+import snow from "./assets/snow.jpg";
+import defaultBg from "./assets/default.jpg";
+import "./index.css";
 
-function App() {
+const WeatherApp = () => {
+  const [query, setQuery] = useState("");
   const [weather, setWeather] = useState(null);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const fetchWeather = async (city) => {
-    try {
-      setError("");
-      setLoading(true);
-      setWeather(null);
+  // ✅ Step 1: Function to get weather data
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    const apiKey = "838403eb5522824b99dca042e79d6def"; // Replace with your actual key
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${apiKey}&units=metric`;
 
-      // Step 1: Get coordinates
-      const geoRes = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${city}`
-      );
-      const geoData = await geoRes.json();
-
-      if (!geoData.results || geoData.results.length === 0) {
-        setError("City not found");
-        setLoading(false);
-        return;
-      }
-
-      const { latitude, longitude, name, country } = geoData.results[0];
-
-      // Step 2: Get weather
-      const weatherRes = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
-      );
-      const weatherData = await weatherRes.json();
-
-      setWeather({
-        name,
-        country,
-        temperature: weatherData.current_weather.temperature,
-        windspeed: weatherData.current_weather.windspeed,
-      });
-
-      setLoading(false);
-    } catch (err) {
-      setError("Failed to fetch weather data");
-      setLoading(false);
-    }
+    const response = await fetch(url);
+    const data = await response.json();
+    setWeather(data);
   };
 
+  // ✅ Step 2: Choose background image based on weather
+  const getBackgroundImage = () => {
+  if (!weather || !weather.weather || !weather.weather[0]) {
+    return defaultBg;
+  }
+
+  const condition = weather.weather[0].main.toLowerCase();
+
+  if (condition.includes("cloud")) return cloudy;
+  if (condition.includes("rain")) return rainy;
+  if (condition.includes("clear")) return sunny;
+  if (condition.includes("snow")) return snow;
+  return defaultBg;
+};
+
+
+  // ✅ Step 3: Apply the background dynamically
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-sky-400 via-sky-200 to-blue-100 px-4">
-      {/* Header */}
-      <h1 className="text-4xl font-extrabold mb-8 text-white drop-shadow-lg">
-        🌤 Weather Now
-      </h1>
+    <div
+      className="min-h-screen bg-cover bg-center flex flex-col items-center justify-center text-white transition-all duration-700"
+      style={{
+        backgroundImage: `url(${getBackgroundImage()})`,
+      }}
+    >
+      <h1 className="text-4xl font-bold mb-4">🌤 Weather Now</h1>
 
-      {/* Search Bar */}
-      <SearchBar onSearch={fetchWeather} />
+      <form onSubmit={handleSearch} className="mb-6">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Enter city"
+          className="p-2 rounded text-black"
+        />
+        <button type="submit" className="ml-2 px-4 py-2 bg-blue-600 rounded">
+          Search
+        </button>
+      </form>
 
-      {/* Loading */}
-      {loading && <p className="text-blue-900 mt-6 text-lg font-medium">Loading...</p>}
-
-      {/* Error */}
-      {error && (
-        <p className="text-red-600 mt-6 bg-red-100 px-4 py-2 rounded-lg">
-          {error}
-        </p>
-      )}
-
-      {/* Weather Card */}
       {weather && (
-        <div className="mt-8 bg-white/80 backdrop-blur-md shadow-lg rounded-2xl p-8 w-80 text-center transition-all duration-300 hover:scale-105">
-          <h2 className="text-2xl font-semibold text-gray-800">
-            {weather.name}, {weather.country}
-          </h2>
-
-          <p className="text-5xl font-bold text-blue-600 mt-4">
-            {weather.temperature}°C
-          </p>
-
-          <p className="text-gray-600 mt-3">💨 Wind Speed: {weather.windspeed} km/h</p>
-
+        <div className="bg-black bg-opacity-50 p-6 rounded-lg text-center">
+          <h2 className="text-2xl font-semibold">{weather.name}</h2>
+          <p className="text-lg">Temperature: {weather.main.temp}°C</p>
+          <p className="text-lg">Condition: {weather.weather[0].main}</p>
+          <p className="text-lg">Wind Speed: {weather.wind.speed} km/h</p>
         </div>
       )}
     </div>
   );
-}
+};
 
-export default App;
+export default WeatherApp;
