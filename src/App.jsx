@@ -60,14 +60,35 @@ const WeatherApp = () => {
         </button>
       </form>
 
-      {weather && (
-        <div className="bg-black bg-opacity-50 p-6 rounded-lg text-center">
-          <h2 className="text-2xl font-semibold">{weather.name}</h2>
-          <p className="text-lg">Temperature: {weather.main.temp}°C</p>
-          <p className="text-lg">Condition: {weather.weather[0].main}</p>
-          <p className="text-lg">Wind Speed: {weather.wind.speed} km/h</p>
-        </div>
-      )}
+      {weather && weather.main && (
+  <div className="bg-black bg-opacity-50 p-6 rounded-lg text-center space-y-2">
+    <h2 className="text-2xl font-semibold">{weather.name}</h2>
+
+    {/* Weather Icon */}
+    {weather.weather && weather.weather[0] && (
+      <img
+        src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
+        alt={weather.weather[0].description}
+        className="mx-auto"
+      />
+    )}
+
+    <p className="text-lg font-medium">
+      {weather.weather[0].main} ({weather.weather[0].description})
+    </p>
+
+    {/* Temperature */}
+    <p className="text-lg">🌡 Temperature: {weather.main.temp}°C</p>
+
+    {/* New features 👇 */}
+    <p className="text-lg">💧 Humidity: {weather.main.humidity}%</p>
+    <p className="text-lg">📊 Pressure: {weather.main.pressure} hPa</p>
+
+    {/* Wind */}
+    <p className="text-lg">💨 Wind Speed: {weather.wind.speed} km/h</p>
+  </div>
+)}
+
     </div>
   );
 };
