@@ -4,10 +4,12 @@ import SearchBar from "./components/SearchBar";
 function App() {
   const [weather, setWeather] = useState(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const fetchWeather = async (city) => {
     try {
       setError("");
+      setLoading(true);
       setWeather(null);
 
       // Step 1: Get coordinates
@@ -18,6 +20,7 @@ function App() {
 
       if (!geoData.results || geoData.results.length === 0) {
         setError("City not found");
+        setLoading(false);
         return;
       }
 
@@ -34,27 +37,48 @@ function App() {
         country,
         temperature: weatherData.current_weather.temperature,
         windspeed: weatherData.current_weather.windspeed,
-        condition: weatherData.current_weather.weathercode,
       });
+
+      setLoading(false);
     } catch (err) {
       setError("Failed to fetch weather data");
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-sky-200 to-sky-400">
-      <h1 className="text-3xl font-bold mt-10">🌤 Weather Now</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-sky-400 via-sky-200 to-blue-100 px-4">
+      {/* Header */}
+      <h1 className="text-4xl font-extrabold mb-8 text-white drop-shadow-lg">
+        🌤 Weather Now
+      </h1>
+
+      {/* Search Bar */}
       <SearchBar onSearch={fetchWeather} />
 
-      {error && <p className="text-red-600 mt-4">{error}</p>}
+      {/* Loading */}
+      {loading && <p className="text-blue-900 mt-6 text-lg font-medium">Loading...</p>}
 
+      {/* Error */}
+      {error && (
+        <p className="text-red-600 mt-6 bg-red-100 px-4 py-2 rounded-lg">
+          {error}
+        </p>
+      )}
+
+      {/* Weather Card */}
       {weather && (
-        <div className="mt-6 bg-white shadow-lg p-6 rounded-2xl text-center">
-          <h2 className="text-2xl font-semibold">
+        <div className="mt-8 bg-white/80 backdrop-blur-md shadow-lg rounded-2xl p-8 w-80 text-center transition-all duration-300 hover:scale-105">
+          <h2 className="text-2xl font-semibold text-gray-800">
             {weather.name}, {weather.country}
           </h2>
-          <p className="text-lg mt-2">Temperature: {weather.temperature}°C</p>
-          <p>Wind Speed: {weather.windspeed} km/h</p>
+
+          <p className="text-5xl font-bold text-blue-600 mt-4">
+            {weather.temperature}°C
+          </p>
+
+          <p className="text-gray-600 mt-3">💨 Wind Speed: {weather.windspeed} km/h</p>
+
         </div>
       )}
     </div>
